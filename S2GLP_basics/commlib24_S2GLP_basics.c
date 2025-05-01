@@ -528,234 +528,296 @@ void pulse_get_raw_data_cnf_callback(void *p_context, int32_t protocol_handle,
 ==============================================================================
  */
 
+// int main()
+// {
+// 	int32_t return_code = 0;
+
+// 	/* connect to a sensor board */
+// 	/* ------------------------- */
+// 	protocol_handle = connect_to_sensor();
+// 	if (protocol_handle < 0)
+// 	{
+// 		printf("Error: Could not find a sensor board.\n");
+// 		return protocol_handle;
+// 	}
+
+// 	/* search for relevant endpoints */
+// 	/* ----------------------------- */
+// 	if (query_communications_endpoints() == 1)
+// 	{
+// 		/* configure chip to power on reset parameters */
+// 		return_code = configure_sensor();
+// 		if (return_code & 0xFFFF)
+// 		{
+// 			on_error(return_code);
+// 			return (return_code & 0xFFFF);
+// 		}
+
+// 		printf("---- register callbacks ----\n");
+
+// 		ep_radar_s2glp_pulse_get_shield_info_cb(pulse_get_shield_info_cnf_callback, NULL);
+// 		ep_radar_s2glp_pulse_get_raw_data_cb(pulse_get_raw_data_cnf_callback, &(Show_Raw_Data_Options_t){.show_raw_data_header = true, .show_raw_data = true});
+
+// 		ep_radar_s2glp_pulse_set_para_value_cb(pulse_para_value_callback, NULL);
+// 		ep_radar_s2glp_pulse_set_para_def_cb(pulse_para_value_def_callback, NULL);
+// 		ep_radar_s2glp_pulse_result_cb(pulse_result_cnf_callback, NULL);
+
+// 		ep_radar_base_board_consumption_cb(mcubase_consumption_cnf_callback, NULL);
+// 		ep_radar_base_board_consumption_def_cb(mcubase_consumption_def_cnf_callback, NULL);
+// 		ep_radar_base_board_para_store_cb(mcubase_para_store_callback, NULL);
+// 		ep_radar_base_board_para_factory_reset_cb(mcubase_para_factory_reset_callback, NULL);
+// 		ep_radar_base_board_board_info_cb(mcubase_board_info_callback, NULL);
+
+// 		{
+// 			printf("Trying to get a device info ...");
+
+// 			Firmware_Information_t fw_info;
+// 			return_code = protocol_get_firmware_information(protocol_handle, &fw_info);
+
+// 			printf("%s\n", ((return_code & 0xFFFF) == 0) ? "OK." : "Failed!");
+// 			if ((return_code & 0xFFFF))
+// 			{
+// 				goto ON_ERROR;
+// 			}
+
+// 			printf("FW info: \"%s\": %d.%d.%d\n", fw_info.description, fw_info.version_major, fw_info.version_minor, fw_info.version_build);
+// 			fflush(stdout);
+// 		}
+
+// 		// request new parameter values
+// 		printf("---- pulse: request parameter values ----\n");
+// 		ep_radar_s2glp_pulse_para_value_req(protocol_handle, endpoint_s2glp_shield);
+
+// 		protocol_poll_receive_once(protocol_handle);
+// 		fflush(stdout);
+
+// 		printf("---- base board: factory reset ----\n");
+// 		ep_radar_base_board_para_factory_reset_req(protocol_handle, endpoint_base_board);
+// 		fflush(stdout);
+// 		Sleep(500);
+// 		protocol_poll_receive_once(protocol_handle);
+
+// 		printf("---- pulse: get shield info ----\n");
+// 		ep_radar_s2glp_pulse_get_shield_info_req(protocol_handle, endpoint_s2glp_shield);
+// 		protocol_poll_receive_once(protocol_handle);
+// 		fflush(stdout);
+
+// 		printf("---- pulse: parameter definition ----\n");
+// 		ep_radar_s2glp_pulse_para_value_def_req(protocol_handle, endpoint_s2glp_shield);
+// 		fflush(stdout);
+// 		Sleep(500);
+// 		protocol_poll_receive_once(protocol_handle);
+
+// 		// request parameter values
+// 		printf("---- pulse: request parameter values ----\n");
+// 		ep_radar_s2glp_pulse_para_value_req(protocol_handle, endpoint_s2glp_shield);
+// 		Sleep(500);
+// 		protocol_poll_receive_once(protocol_handle);
+// 		fflush(stdout);
+
+// 		// set the new values
+// 		{
+// 			printf("---- pulse: set new values 64 ----\n");
+// 			int32_t result = ep_radar_s2glp_pulse_para_set_value_req(protocol_handle, endpoint_s2glp_shield,
+// 																	 (pulse_para_values_t){
+// 																		 .max_speed_mps = 1.22F,
+// 																		 .min_speed_mps = 1.0F,
+// 																		 .frame_time_sec = 0.500F,
+// 																		 .number_of_samples = 64,
+// 																		 .sampling_freq_hz = 2000.0F,
+// 																		 .doppler_sensitivity = 800,
+// 																		 .motion_sensitivity = 400,
+// 																		 .use_high_gain_doppler_bool = 1,
+// 																		 .equistantant_mode = 0,
+// 																		 .number_of_skip_samples = 100,
+// 																		 .pulse_width_usec = 4});
+// 			printf("req_result: 0x%04x, %s\n", result & 0xFFFF,
+// 				   protocol_get_status_code_description(protocol_handle, result));
+// 			Sleep(10);
+// 			protocol_poll_receive_once(protocol_handle);
+// 			fflush(stdout);
+// 		}
+
+// 		/* set the new values */
+// 		{
+// 			printf("---- pulse: set new values 32 ----\n");
+// 			int32_t result = ep_radar_s2glp_pulse_para_set_value_req(protocol_handle, endpoint_s2glp_shield,
+// 																	 (pulse_para_values_t){
+// 																		 .max_speed_mps = 1.22F,
+// 																		 .min_speed_mps = 1.0F,
+// 																		 .frame_time_sec = 0.500F,
+// 																		 .number_of_samples = 32,
+// 																		 .sampling_freq_hz = 2000.0F,
+// 																		 .doppler_sensitivity = 800,
+// 																		 .motion_sensitivity = 400,
+// 																		 .use_high_gain_doppler_bool = 1,
+// 																		 .equistantant_mode = 0,
+// 																		 .number_of_skip_samples = 100,
+// 																		 .pulse_width_usec = 4});
+// 			printf("req_result: 0x%04x, %s\n", result & 0xFFFF,
+// 				   protocol_get_status_code_description(protocol_handle, result));
+// 			protocol_poll_receive_once(protocol_handle);
+// 			fflush(stdout);
+// 		}
+
+// 		/* request new parameter values */
+// 		printf("---- pulse: request parameter values ----\n");
+// 		ep_radar_s2glp_pulse_para_value_req(protocol_handle, endpoint_s2glp_shield);
+// 		protocol_poll_receive_once(protocol_handle);
+// 		fflush(stdout);
+
+// 		printf("---- pulse: get 5x results ----\n");
+// 		ep_radar_s2glp_pulse_result_req(protocol_handle, endpoint_s2glp_shield, 5);
+// 		fflush(stdout);
+// 		for (int i = 0; i < 5; i++)
+// 		{
+// 			protocol_poll_receive_once(protocol_handle);
+// 			fflush(stdout);
+// 		}
+// 		fflush(stdout);
+
+// 		printf("---- pulse: get shield info ----\n");
+// 		ep_radar_s2glp_pulse_get_shield_info_req(protocol_handle, endpoint_s2glp_shield);
+// 		protocol_poll_receive_once(protocol_handle);
+// 		fflush(stdout);
+
+// 		/* factory reset*/
+// 		printf("---- set to default values again ----\n");
+// 		ep_radar_base_board_para_factory_reset_req(protocol_handle, endpoint_base_board);
+
+// 		ep_radar_s2glp_pulse_result_req(protocol_handle, endpoint_s2glp_shield, 30);
+// 		printf("---- pulse: get raw data ----\n");
+// 		ep_radar_s2glp_get_raw_data_req(protocol_handle, endpoint_s2glp_shield, 10);
+// 		for (int i = 0; i < 20; i++)
+// 		{
+// 			protocol_poll_receive_once(protocol_handle);
+// 			fflush(stdout);
+// 		}
+// 		protocol_poll_receive_once(protocol_handle);
+// 		fflush(stdout);
+
+// 		printf("---- check base board endpoint ----\n");
+// 		{
+// 			/* get version of endpoint to understand, which structure elements are valid! */
+// 			Endpoint_Info_t endpoint_info;
+
+// 			if (protocol_get_endpoint_info(protocol_handle, endpoint_base_board, &endpoint_info) > 0)
+// 			{
+// 				/* error */
+// 			}
+// 			else
+// 			{
+// 				printf("endpoint version: %d\n", endpoint_info.version);
+// 				printf("endpoint type: 0x%08x, (%c%c%c%c)\n", endpoint_info.type,
+// 					   (endpoint_info.type & 0xFF000000) >> 24,
+// 					   (endpoint_info.type & 0x00FF0000) >> 16,
+// 					   (endpoint_info.type & 0x0000FF00) >> 8,
+// 					   (endpoint_info.type & 0x000000FF));
+// 				printf("endpoint description: %s\n", endpoint_info.description);
+// 			}
+// 		}
+
+// 		printf("---- base board: rf_board_id ----\n");
+// 		ep_radar_base_board_board_info_req(protocol_handle, endpoint_base_board);
+// 		protocol_poll_receive_once(protocol_handle);
+
+// 		printf("---- base board: Consumption definition ----\n");
+// 		/* request consumption */
+// 		ep_radar_base_board_consumption_def_req(protocol_handle, endpoint_base_board);
+// 		protocol_poll_receive_once(protocol_handle);
+// 		fflush(stdout);
+
+// 		/* request results */
+// 		printf("---- base board: Consumption result ----\n");
+// 		ep_radar_base_board_consumption_req(protocol_handle, endpoint_base_board, 5);
+
+// 		protocol_poll_receive_once(protocol_handle);
+// 		fflush(stdout);
+
+// 		printf("---- base board: factory reset ----\n");
+// 		ep_radar_base_board_para_factory_reset_req(protocol_handle, endpoint_base_board);
+// 		protocol_poll_receive_once(protocol_handle);
+// 		fflush(stdout);
+
+// 		printf("---- base board: parameter store ----\n");
+// 		ep_radar_base_board_para_store_req(protocol_handle, endpoint_base_board);
+// 		protocol_poll_receive_once(protocol_handle);
+// 		fflush(stdout);
+// 	}
+
+// ON_ERROR:
+// 	if ((return_code & 0xFFFF))
+// 	{
+// 		printf("Error Code 0x%06x: %d, %s\n", return_code, return_code,
+// 			   protocol_get_status_code_description(protocol_handle, return_code));
+// 	}
+
+// 	/* finally, close the connection */
+// 	/* ----------------------------- */
+// 	printf("Connection is closed now.\n ");
+// 	protocol_disconnect(protocol_handle);
+
+// 	return (return_code & 0xFFFF);
+// }
+
+
 int main()
 {
 	int32_t return_code = 0;
 
-	/* connect to a sensor board */
-	/* ------------------------- */
-	protocol_handle = connect_to_sensor();
-	if (protocol_handle < 0)
-	{
-		printf("Error: Could not find a sensor board.\n");
-		return protocol_handle;
-	}
+    protocol_handle = connect_to_sensor();
+    if (protocol_handle < 0)
+    {
+        printf("Error: Could not find a sensor board.\n");
+        return protocol_handle;
+    }
 
-	/* search for relevant endpoints */
-	/* ----------------------------- */
-	if (query_communications_endpoints() == 1)
-	{
-		/* configure chip to power on reset parameters */
-		return_code = configure_sensor();
-		if (return_code & 0xFFFF)
-		{
-			on_error(return_code);
-			return (return_code & 0xFFFF);
-		}
+    if (query_communications_endpoints() == 1)
+    {
+        return_code = configure_sensor();
+        if (return_code & 0xFFFF)
+        {
+            on_error(return_code);
+            return (return_code & 0xFFFF);
+        }
 
-		printf("---- register callbacks ----\n");
+        printf("---- register callbacks ----\n");
 
-		ep_radar_s2glp_pulse_get_shield_info_cb(pulse_get_shield_info_cnf_callback, NULL);
-		ep_radar_s2glp_pulse_get_raw_data_cb(pulse_get_raw_data_cnf_callback, &(Show_Raw_Data_Options_t){.show_raw_data_header = true, .show_raw_data = true});
+        ep_radar_s2glp_pulse_result_cb(pulse_result_cnf_callback, NULL);
 
-		ep_radar_s2glp_pulse_set_para_value_cb(pulse_para_value_callback, NULL);
-		ep_radar_s2glp_pulse_set_para_def_cb(pulse_para_value_def_callback, NULL);
-		ep_radar_s2glp_pulse_result_cb(pulse_result_cnf_callback, NULL);
+        // Configure pulse mode parameters
+        ep_radar_s2glp_pulse_para_set_value_req(protocol_handle, endpoint_s2glp_shield,
+            (pulse_para_values_t){
+                .max_speed_mps = 3.0F,
+                .min_speed_mps = 0.2F,
+                .frame_time_sec = 0.15F,
+                .number_of_samples = 128,
+                .sampling_freq_hz = 2000.0F,
+                .doppler_sensitivity = 50,
+                .motion_sensitivity = 10,
+                .use_high_gain_doppler_bool = 1,
+                .equistantant_mode = 0,
+                .number_of_skip_samples = 40,
+                .pulse_width_usec = 5
+            });
 
-		ep_radar_base_board_consumption_cb(mcubase_consumption_cnf_callback, NULL);
-		ep_radar_base_board_consumption_def_cb(mcubase_consumption_def_cnf_callback, NULL);
-		ep_radar_base_board_para_store_cb(mcubase_para_store_callback, NULL);
-		ep_radar_base_board_para_factory_reset_cb(mcubase_para_factory_reset_callback, NULL);
-		ep_radar_base_board_board_info_cb(mcubase_board_info_callback, NULL);
+        Sleep(200);
+        protocol_poll_receive_once(protocol_handle);
 
-		{
-			printf("Trying to get a device info ...");
+        printf("---- Continuous speed measurement every 0.1 second ----\n");
 
-			Firmware_Information_t fw_info;
-			return_code = protocol_get_firmware_information(protocol_handle, &fw_info);
+        while (1)
+        {
+            ep_radar_s2glp_pulse_result_req(protocol_handle, endpoint_s2glp_shield, 1);
 
-			printf("%s\n", ((return_code & 0xFFFF) == 0) ? "OK." : "Failed!");
-			if ((return_code & 0xFFFF))
-			{
-				goto ON_ERROR;
-			}
+            protocol_poll_receive_once(protocol_handle);
 
-			printf("FW info: \"%s\": %d.%d.%d\n", fw_info.description, fw_info.version_major, fw_info.version_minor, fw_info.version_build);
-			fflush(stdout);
-		}
+            Sleep(100); // wait for 0.1 second (100 ms)
+        }
+    }
 
-		// request new parameter values
-		printf("---- pulse: request parameter values ----\n");
-		ep_radar_s2glp_pulse_para_value_req(protocol_handle, endpoint_s2glp_shield);
+    printf("Connection is closed now.\n");
+    protocol_disconnect(protocol_handle);
 
-		protocol_poll_receive_once(protocol_handle);
-		fflush(stdout);
-
-		printf("---- base board: factory reset ----\n");
-		ep_radar_base_board_para_factory_reset_req(protocol_handle, endpoint_base_board);
-		fflush(stdout);
-		Sleep(500);
-		protocol_poll_receive_once(protocol_handle);
-
-		printf("---- pulse: get shield info ----\n");
-		ep_radar_s2glp_pulse_get_shield_info_req(protocol_handle, endpoint_s2glp_shield);
-		protocol_poll_receive_once(protocol_handle);
-		fflush(stdout);
-
-		printf("---- pulse: parameter definition ----\n");
-		ep_radar_s2glp_pulse_para_value_def_req(protocol_handle, endpoint_s2glp_shield);
-		fflush(stdout);
-		Sleep(500);
-		protocol_poll_receive_once(protocol_handle);
-
-		// request parameter values
-		printf("---- pulse: request parameter values ----\n");
-		ep_radar_s2glp_pulse_para_value_req(protocol_handle, endpoint_s2glp_shield);
-		Sleep(500);
-		protocol_poll_receive_once(protocol_handle);
-		fflush(stdout);
-
-		// set the new values
-		{
-			printf("---- pulse: set new values 64 ----\n");
-			int32_t result = ep_radar_s2glp_pulse_para_set_value_req(protocol_handle, endpoint_s2glp_shield,
-																	 (pulse_para_values_t){
-																		 .max_speed_mps = 1.22F,
-																		 .min_speed_mps = 1.0F,
-																		 .frame_time_sec = 0.500F,
-																		 .number_of_samples = 64,
-																		 .sampling_freq_hz = 2000.0F,
-																		 .doppler_sensitivity = 800,
-																		 .motion_sensitivity = 400,
-																		 .use_high_gain_doppler_bool = 1,
-																		 .equistantant_mode = 0,
-																		 .number_of_skip_samples = 100,
-																		 .pulse_width_usec = 4});
-			printf("req_result: 0x%04x, %s\n", result & 0xFFFF,
-				   protocol_get_status_code_description(protocol_handle, result));
-			Sleep(10);
-			protocol_poll_receive_once(protocol_handle);
-			fflush(stdout);
-		}
-
-		/* set the new values */
-		{
-			printf("---- pulse: set new values 32 ----\n");
-			int32_t result = ep_radar_s2glp_pulse_para_set_value_req(protocol_handle, endpoint_s2glp_shield,
-																	 (pulse_para_values_t){
-																		 .max_speed_mps = 1.22F,
-																		 .min_speed_mps = 1.0F,
-																		 .frame_time_sec = 0.500F,
-																		 .number_of_samples = 32,
-																		 .sampling_freq_hz = 2000.0F,
-																		 .doppler_sensitivity = 800,
-																		 .motion_sensitivity = 400,
-																		 .use_high_gain_doppler_bool = 1,
-																		 .equistantant_mode = 0,
-																		 .number_of_skip_samples = 100,
-																		 .pulse_width_usec = 4});
-			printf("req_result: 0x%04x, %s\n", result & 0xFFFF,
-				   protocol_get_status_code_description(protocol_handle, result));
-			protocol_poll_receive_once(protocol_handle);
-			fflush(stdout);
-		}
-
-		/* request new parameter values */
-		printf("---- pulse: request parameter values ----\n");
-		ep_radar_s2glp_pulse_para_value_req(protocol_handle, endpoint_s2glp_shield);
-		protocol_poll_receive_once(protocol_handle);
-		fflush(stdout);
-
-		printf("---- pulse: get 5x results ----\n");
-		ep_radar_s2glp_pulse_result_req(protocol_handle, endpoint_s2glp_shield, 5);
-		fflush(stdout);
-		for (int i = 0; i < 5; i++)
-		{
-			protocol_poll_receive_once(protocol_handle);
-			fflush(stdout);
-		}
-		fflush(stdout);
-
-		printf("---- pulse: get shield info ----\n");
-		ep_radar_s2glp_pulse_get_shield_info_req(protocol_handle, endpoint_s2glp_shield);
-		protocol_poll_receive_once(protocol_handle);
-		fflush(stdout);
-
-		/* factory reset*/
-		printf("---- set to default values again ----\n");
-		ep_radar_base_board_para_factory_reset_req(protocol_handle, endpoint_base_board);
-
-		ep_radar_s2glp_pulse_result_req(protocol_handle, endpoint_s2glp_shield, 30);
-		printf("---- pulse: get raw data ----\n");
-		ep_radar_s2glp_get_raw_data_req(protocol_handle, endpoint_s2glp_shield, 10);
-		for (int i = 0; i < 20; i++)
-		{
-			protocol_poll_receive_once(protocol_handle);
-			fflush(stdout);
-		}
-		protocol_poll_receive_once(protocol_handle);
-		fflush(stdout);
-
-		printf("---- check base board endpoint ----\n");
-		{
-			/* get version of endpoint to understand, which structure elements are valid! */
-			Endpoint_Info_t endpoint_info;
-
-			if (protocol_get_endpoint_info(protocol_handle, endpoint_base_board, &endpoint_info) > 0)
-			{
-				/* error */
-			}
-			else
-			{
-				printf("endpoint version: %d\n", endpoint_info.version);
-				printf("endpoint type: 0x%08x, (%c%c%c%c)\n", endpoint_info.type,
-					   (endpoint_info.type & 0xFF000000) >> 24,
-					   (endpoint_info.type & 0x00FF0000) >> 16,
-					   (endpoint_info.type & 0x0000FF00) >> 8,
-					   (endpoint_info.type & 0x000000FF));
-				printf("endpoint description: %s\n", endpoint_info.description);
-			}
-		}
-
-		printf("---- base board: rf_board_id ----\n");
-		ep_radar_base_board_board_info_req(protocol_handle, endpoint_base_board);
-		protocol_poll_receive_once(protocol_handle);
-
-		printf("---- base board: Consumption definition ----\n");
-		/* request consumption */
-		ep_radar_base_board_consumption_def_req(protocol_handle, endpoint_base_board);
-		protocol_poll_receive_once(protocol_handle);
-		fflush(stdout);
-
-		/* request results */
-		printf("---- base board: Consumption result ----\n");
-		ep_radar_base_board_consumption_req(protocol_handle, endpoint_base_board, 5);
-
-		protocol_poll_receive_once(protocol_handle);
-		fflush(stdout);
-
-		printf("---- base board: factory reset ----\n");
-		ep_radar_base_board_para_factory_reset_req(protocol_handle, endpoint_base_board);
-		protocol_poll_receive_once(protocol_handle);
-		fflush(stdout);
-
-		printf("---- base board: parameter store ----\n");
-		ep_radar_base_board_para_store_req(protocol_handle, endpoint_base_board);
-		protocol_poll_receive_once(protocol_handle);
-		fflush(stdout);
-	}
-
-ON_ERROR:
-	if ((return_code & 0xFFFF))
-	{
-		printf("Error Code 0x%06x: %d, %s\n", return_code, return_code,
-			   protocol_get_status_code_description(protocol_handle, return_code));
-	}
-
-	/* finally, close the connection */
-	/* ----------------------------- */
-	printf("Connection is closed now.\n ");
-	protocol_disconnect(protocol_handle);
-
-	return (return_code & 0xFFFF);
+    return (return_code & 0xFFFF);
 }
